@@ -2,8 +2,8 @@
 data "aws_iam_policy_document" "ecs_task_execution_role" {
   version = "2012-10-17"
   statement {
-    sid = ""
-    effect = "Allow"
+    sid     = ""
+    effect  = "Allow"
     actions = ["sts:AssumeRole"]
 
     principals {
@@ -24,3 +24,30 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
+
+resource "aws_iam_role_policy" "read_task_container_secrets" {
+  count = local.should_add_secrets ? 1 : 0
+  name   = "${local.full_app_name}-read-secrets"
+  role   = aws_iam_role.ecs_task_execution_role.id
+  policy = data.aws_iam_policy_document.secrets.json
+}
+
+data "aws_iam_policy_document" "secrets" {
+  statement {
+    effect = "Allow"
+
+    resources = concat(
+      [data.aws_kms_key.secrets_key.arn],
+      [for i in var.secrets.secret_values : replace(i["valueFrom"], "/:[^:]+::$/", "")]
+    )
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "kms:Decrypt",
+    ]
+  }
+}
+
+data "aws_kms_key" "secrets_key" {
+  key_id = var.secrets.secrets_kms_key_id
+}
+

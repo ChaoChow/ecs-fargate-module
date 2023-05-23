@@ -22,10 +22,10 @@ resource "aws_alb_target_group" "app" {
   }
 
   stickiness {
-    cookie_duration= var.alb_stickiness.cookie_duration
-    cookie_name = var.alb_stickiness.cookie_name
-    enabled = var.alb_stickiness.enabled
-    type = var.alb_stickiness.type
+    cookie_duration = var.alb_stickiness.cookie_duration
+    cookie_name     = var.alb_stickiness.cookie_name
+    enabled         = var.alb_stickiness.enabled
+    type            = var.alb_stickiness.type
   }
 }
 
