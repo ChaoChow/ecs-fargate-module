@@ -104,22 +104,31 @@ variable "secrets" {
   description = "Contains values used to configure the adding of secrets to the ecs task"
   type = object({
     secrets_kms_key_id = string
-    secret_values     = list(object({
+    secret_values = list(object({
       name      = string
       valueFrom = string
     }))
   })
   default = {
     secrets_kms_key_id = null
-    secret_values = []
+    secret_values      = []
   }
 }
 
 variable "env_vars" {
   description = "Contains any environment variables you would like to inject into the ecs container"
   type = list(object({
-    name = string
+    name  = string
     value = string
+  }))
+  default = []
+}
+
+variable "additional_policies" {
+  description = "List of additional JSON policies objects you would like to attach to your ECS Fargate Role. Valid properties of list objects are 'name' and 'json'. 'json' property should have the IAM policy in JSON format as the value. Use JSON format not HCL object format."
+  type = list(object({
+    name = string
+    json = any
   }))
   default = []
 }
