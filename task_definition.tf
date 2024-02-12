@@ -5,29 +5,30 @@ resource "aws_ecs_task_definition" "app" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.container_definitions.fargate_cpu
   memory                   = var.container_definitions.fargate_memory
-  container_definitions    = jsonencode(
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
+  container_definitions = jsonencode(
     [
       {
-        name: local.full_app_name,
-        image: var.container_definitions.app_image,
-        cpu: var.container_definitions.fargate_cpu,
-        memory: var.container_definitions.fargate_memory,
-        networkMode: "awsvpc",
-        logConfiguration: {
-          logDriver: "awslogs",
-          options: {
-            awslogs-group: aws_cloudwatch_log_group.ecs_log_group.name,
-            awslogs-region: var.network.aws_region,
-            awslogs-stream-prefix: "ecs"
+        name : local.full_app_name,
+        image : var.container_definitions.app_image,
+        cpu : var.container_definitions.fargate_cpu,
+        memory : var.container_definitions.fargate_memory,
+        networkMode : "awsvpc",
+        logConfiguration : {
+          logDriver : "awslogs",
+          options : {
+            awslogs-group : aws_cloudwatch_log_group.ecs_log_group.name,
+            awslogs-region : var.network.aws_region,
+            awslogs-stream-prefix : "ecs"
           }
         },
-        portMappings: [
+        portMappings : [
           {
-            containerPort: var.container_definitions.app_port
+            containerPort : var.container_definitions.app_port
           }
         ],
-        environment: var.env_vars
-        secrets: var.secrets.secret_values
+        environment : var.env_vars
+        secrets : var.secrets.secret_values
       }
     ]
   )
